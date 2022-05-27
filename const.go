@@ -26,6 +26,7 @@ const (
 	STATUS_PAUSED    = "paused"
 	STATUS_RECURRING = "recurring"
 	STATUS_TEMPLATE  = "template"
+	STATUS_BLOCKED   = "blocked"
 
 	CMD_NEXT             = "next"
 	CMD_ADD              = "add"
@@ -53,6 +54,7 @@ const (
 	CMD_SHOW_PAUSED      = "show-paused"
 	CMD_SHOW_OPEN        = "show-open"
 	CMD_SHOW_RESOLVED    = "show-resolved"
+	CMD_SHOW_BLOCKED     = "show-blocked"
 	CMD_SHOW_TEMPLATES   = "show-templates"
 	CMD_SHOW_UNORGANISED = "show-unorganised"
 	CMD_GRAPH            = "graph"
@@ -111,6 +113,7 @@ var ALL_STATUSES = []string{
 	STATUS_RECURRING,
 	STATUS_RESOLVED,
 	STATUS_TEMPLATE,
+	STATUS_BLOCKED,
 }
 
 // statuses which are hidden by default (direct addressing or show- commands
@@ -119,6 +122,7 @@ var HIDDEN_STATUSES = []string{
 	STATUS_RECURRING,
 	STATUS_RESOLVED,
 	STATUS_TEMPLATE,
+	STATUS_BLOCKED,
 }
 
 // incomplete until all statuses are implemented
@@ -130,6 +134,10 @@ var VALID_STATUS_TRANSITIONS = [][]string{
 	{STATUS_PAUSED, STATUS_RESOLVED},
 	{STATUS_ACTIVE, STATUS_RESOLVED},
 	{STATUS_PENDING, STATUS_TEMPLATE},
+	{STATUS_PENDING, STATUS_BLOCKED},
+	{STATUS_PAUSED, STATUS_BLOCKED},
+	{STATUS_ACTIVE, STATUS_BLOCKED},
+	{STATUS_BLOCKED, STATUS_PENDING},
 }
 
 // for most operations, it's not necessary or desirable to load the expensive resolved tasks
@@ -141,6 +149,7 @@ var NON_RESOLVED_STATUSES = []string{
 	STATUS_PAUSED,
 	STATUS_RECURRING,
 	STATUS_TEMPLATE,
+	STATUS_BLOCKED,
 }
 
 var ALL_CMDS = []string{
@@ -170,6 +179,7 @@ var ALL_CMDS = []string{
 	CMD_SHOW_PAUSED,
 	CMD_SHOW_OPEN,
 	CMD_SHOW_RESOLVED,
+	CMD_SHOW_BLOCKED,
 	CMD_SHOW_TEMPLATES,
 	CMD_SHOW_UNORGANISED,
 	CMD_GRAPH,

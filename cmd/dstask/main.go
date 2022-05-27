@@ -154,6 +154,11 @@ func main() {
 			dstask.ExitFail(err.Error())
 		}
 
+	case dstask.CMD_SHOW_BLOCKED:
+		if err := dstask.CommandShowBlocked(conf, ctx, query); err != nil {
+			dstask.ExitFail(err.Error())
+		}
+
 	case dstask.CMD_SHOW_UNORGANISED:
 		if err := dstask.CommandShowUnorganised(conf, ctx, query); err != nil {
 			dstask.ExitFail(err.Error())

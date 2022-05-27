@@ -453,6 +453,22 @@ func CommandShowResolved(conf Config, ctx, query Query) error {
 	return nil
 }
 
+// CommandShowBlocked prints a list of blocked tasks.
+func CommandShowBlocked(conf Config, ctx, query Query) error {
+	ts, err := LoadTaskSet(conf.Repo, conf.IDsFile, true)
+	if err != nil {
+		return err
+	}
+
+	query = query.Merge(ctx)
+	ts.UnHide()
+	ts.Filter(query)
+	ts.FilterByStatus(STATUS_BLOCKED)
+	ts.DisplayByNext(ctx, true)
+
+	return nil
+}
+
 // CommandShowTags prints a list of all tags associated with non-resolved tasks.
 func CommandShowTags(conf Config, ctx, query Query) error {
 	ts, err := LoadTaskSet(conf.Repo, conf.IDsFile, false)
@@ -509,6 +525,7 @@ func CommandGraph(conf Config, ctx, query Query) error {
 	if err != nil {
 		return err
 	}
+	ts.UnHide()
 	//FIXME actually use query
 	fmt.Printf("digraph {\n")
 	for _, t := range ts.AllTasks() {
