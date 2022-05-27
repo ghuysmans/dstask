@@ -55,6 +55,7 @@ const (
 	CMD_SHOW_RESOLVED    = "show-resolved"
 	CMD_SHOW_TEMPLATES   = "show-templates"
 	CMD_SHOW_UNORGANISED = "show-unorganised"
+	CMD_GRAPH            = "graph"
 	CMD_COMPLETIONS      = "_completions"
 	CMD_HELP             = "help"
 	CMD_VERSION          = "version"
@@ -171,6 +172,7 @@ var ALL_CMDS = []string{
 	CMD_SHOW_RESOLVED,
 	CMD_SHOW_TEMPLATES,
 	CMD_SHOW_UNORGANISED,
+	CMD_GRAPH,
 	CMD_COMPLETIONS,
 	CMD_PRINT_BASH_COMPLETION,
 	CMD_PRINT_ZSH_COMPLETION,

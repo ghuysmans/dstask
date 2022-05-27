@@ -159,6 +159,11 @@ func main() {
 			dstask.ExitFail(err.Error())
 		}
 
+	case dstask.CMD_GRAPH:
+		if err := dstask.CommandGraph(conf, ctx, query); err != nil {
+			dstask.ExitFail(err.Error())
+		}
+
 	case dstask.CMD_VERSION:
 		dstask.CommandVersion()
 

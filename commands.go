@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/mvdan/xurls"
 	yaml "gopkg.in/yaml.v2"
@@ -499,6 +500,29 @@ func CommandShowUnorganised(conf Config, ctx, query Query) error {
 
 	ts.FilterOrganised()
 	ts.DisplayByNext(ctx, true)
+	return nil
+}
+
+// CommandGraph outputs a dependency graph.
+func CommandGraph(conf Config, ctx, query Query) error {
+	ts, err := LoadTaskSet(conf.Repo, conf.IDsFile, false)
+	if err != nil {
+		return err
+	}
+	//FIXME actually use query
+	fmt.Printf("digraph {\n")
+	for _, t := range ts.AllTasks() {
+		//TODO represent Status in style?
+		short := t.Summary //FIXME shorten
+		label := strings.ReplaceAll(strings.ReplaceAll(short, "\\", "\\\\"), "\"", "\\\"")
+		fmt.Printf("\"%s\" [label=\"%s\"]\n", t.UUID, label)
+	}
+	for _, t := range ts.Tasks() {
+		for _, d := range t.Dependencies {
+			fmt.Printf("\"%s\" -> \"%s\"\n", t.UUID, d)
+		}
+	}
+	fmt.Printf("}\n")
 	return nil
 }
 
