@@ -205,6 +205,23 @@ func (ts *TaskSet) MustUpdateTask(task Task) {
 	}
 }
 
+func (ts *TaskSet) RemoveDependency(task Task) {
+	for _, t := range ts.tasks {
+		for i, d := range t.Dependencies {
+			if d == task.UUID {
+				if len(t.Dependencies) > 1 {
+					t.Dependencies[i] = t.Dependencies[len(t.Dependencies)-1]
+				} else {
+					t.Status = STATUS_PENDING
+				}
+				t.Dependencies = t.Dependencies[:len(t.Dependencies)-1]
+				t.WritePending = true
+				break
+			}
+		}
+	}
+}
+
 func (ts *TaskSet) UpdateTask(task Task) error {
 	task.Normalise()
 
@@ -232,6 +249,7 @@ func (ts *TaskSet) UpdateTask(task Task) error {
 
 	if task.Status == STATUS_RESOLVED {
 		task.ID = 0
+		ts.RemoveDependency(task)
 	}
 
 	if task.Status == STATUS_RESOLVED && task.Resolved.IsZero() {
