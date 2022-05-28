@@ -191,6 +191,12 @@ func (t *Task) Normalise() {
 	// tags must be unique
 	t.Tags = DeduplicateStrings(t.Tags)
 
+	// dependencies must be sorted
+	sort.Strings(t.Dependencies)
+
+	// dependencies must be unique
+	t.Dependencies = DeduplicateStrings(t.Dependencies)
+
 	if t.Status == STATUS_RESOLVED {
 		// resolved task should not have ID as it's meaningless
 		t.ID = 0
