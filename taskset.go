@@ -205,19 +205,26 @@ func (ts *TaskSet) MustUpdateTask(task Task) {
 	}
 }
 
-func (ts *TaskSet) RemoveDependency(task Task) {
+func (ts *TaskSet) RemoveResolvedDependencies() {
 	for _, t := range ts.tasks {
-		for i, d := range t.Dependencies {
-			if d == task.UUID {
-				if len(t.Dependencies) > 1 {
-					t.Dependencies[i] = t.Dependencies[len(t.Dependencies)-1]
-				} else {
-					t.Status = STATUS_PENDING
+		end := len(t.Dependencies) - 1
+		for i := 0; i <= end; {
+			t2, found := ts.tasksByUUID[t.Dependencies[i]]
+			if !found || t2.Status == STATUS_RESOLVED {
+				if !found {
+					fmt.Printf("not found: %s\n", t.Dependencies[i]);
 				}
-				t.Dependencies = t.Dependencies[:len(t.Dependencies)-1]
+				t.Dependencies[i] = t.Dependencies[end]
+				end--
 				t.WritePending = true
-				break
+			} else {
+				i++
 			}
+		}
+		t.Dependencies = t.Dependencies[:end+1]
+		if end == -1 && t.Status == STATUS_BLOCKED {
+			t.WritePending = true //maybe it was already empty
+			t.Status = STATUS_PENDING
 		}
 	}
 }
@@ -249,7 +256,6 @@ func (ts *TaskSet) UpdateTask(task Task) error {
 
 	if task.Status == STATUS_RESOLVED {
 		task.ID = 0
-		ts.RemoveDependency(task)
 	}
 
 	if task.Status == STATUS_RESOLVED && task.Resolved.IsZero() {
@@ -259,6 +265,7 @@ func (ts *TaskSet) UpdateTask(task Task) error {
 	task.WritePending = true
 	// existing pointer must point to address of new task copied
 	*ts.tasksByUUID[task.UUID] = task
+	ts.RemoveResolvedDependencies()
 	return nil
 }
 
