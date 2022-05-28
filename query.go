@@ -18,6 +18,7 @@ type Query struct {
 	AntiTags      []string
 	Project       string
 	AntiProjects  []string
+	Dependencies  []string
 	Priority      string
 	Template      int
 	Text          string
@@ -47,6 +48,10 @@ func (query Query) String() string {
 
 	for _, project := range query.AntiProjects {
 		args = append(args, "-project:"+project)
+	}
+
+	for _, dep := range query.Dependencies {
+		args = append(args, "%"+dep)
 	}
 
 	if query.Priority != "" {
@@ -81,6 +86,7 @@ func (query Query) HasOperators() bool {
 		len(query.AntiTags) > 0 ||
 		query.Project != "" ||
 		len(query.AntiProjects) > 0 ||
+		len(query.Dependencies) > 0 ||
 		query.Priority != "" ||
 		query.Template > 0)
 }
@@ -93,6 +99,7 @@ func ParseQuery(args ...string) Query {
 	var antiTags []string
 	var project string
 	var antiProjects []string
+	var dependencies []string
 	var priority string
 	var template int
 	var words []string
@@ -134,6 +141,8 @@ func ParseQuery(args ...string) Query {
 			project = lcItem[9:]
 		} else if strings.HasPrefix(lcItem, "-project:") {
 			antiProjects = append(antiProjects, lcItem[9:])
+		} else if strings.HasPrefix(lcItem, "%") {
+			dependencies = append(dependencies, lcItem[1:])
 		} else if strings.HasPrefix(lcItem, "template:") {
 			if s, err := strconv.ParseInt(lcItem[9:], 10, 64); err == nil {
 				template = int(s)
@@ -158,6 +167,7 @@ func ParseQuery(args ...string) Query {
 		AntiTags:      antiTags,
 		Project:       project,
 		AntiProjects:  antiProjects,
+		Dependencies:  dependencies,
 		Priority:      priority,
 		Template:      template,
 		Text:          strings.Join(words, " "),
@@ -180,6 +190,12 @@ func (query *Query) Merge(q2 Query) Query {
 	for _, tag := range q2.AntiTags {
 		if !StrSliceContains(q.AntiTags, tag) {
 			q.AntiTags = append(q.AntiTags, tag)
+		}
+	}
+
+	for _, dep := range q2.Dependencies {
+		if !StrSliceContains(q.Dependencies, dep) {
+			q.Dependencies = append(q.Dependencies, dep)
 		}
 	}
 
