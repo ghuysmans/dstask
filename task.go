@@ -160,6 +160,16 @@ func (t *Task) MatchesFilter(query Query) bool {
 		return false
 	}
 
+	some_dep := false
+	for _, dep := range query.Dependencies {
+		if StrSliceContains(t.Dependencies, dep) {
+			some_dep = true
+		}
+	}
+	if !some_dep && len(query.Dependencies)>0 {
+		return false
+	}
+
 	if query.Project != "" && t.Project != query.Project {
 		return false
 	}

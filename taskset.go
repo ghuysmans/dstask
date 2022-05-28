@@ -4,6 +4,7 @@ package dstask
 
 import (
 	"fmt"
+	"strconv"
 	"io/ioutil"
 	"log"
 	"os"
@@ -269,7 +270,18 @@ func (ts *TaskSet) UpdateTask(task Task) error {
 	return nil
 }
 
+func (ts *TaskSet) TranslateDependencies(query *Query) {
+	for i, dep := range query.Dependencies {
+		if id, err := strconv.ParseInt(dep, 10, 64); err == nil {
+			if int(id) <= len(ts.tasksByID) {
+				query.Dependencies[i] = ts.tasksByID[int(id)].UUID
+			}
+		}
+	}
+}
+
 func (ts *TaskSet) Filter(query Query) {
+	ts.TranslateDependencies(&query)
 	for _, task := range ts.tasks {
 		if !task.MatchesFilter(query) {
 			task.filtered = true
