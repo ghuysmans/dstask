@@ -205,27 +205,39 @@ func (ts *TaskSet) MustUpdateTask(task Task) {
 	}
 }
 
-func (ts *TaskSet) RemoveResolvedDependencies() {
-	for _, t := range ts.tasks {
-		end := len(t.Dependencies) - 1
-		for i := 0; i <= end; {
-			t2, found := ts.tasksByUUID[t.Dependencies[i]]
-			if !found || t2.Status == STATUS_RESOLVED {
-				if !found {
-					fmt.Printf("not found: %s\n", t.Dependencies[i]);
-				}
-				t.Dependencies[i] = t.Dependencies[end]
-				end--
-				t.WritePending = true
-			} else {
-				i++
+func (ts *TaskSet) visitDependencies(t *Task) {
+	if t.dfs == Visited {
+		return //visit it just once
+	}
+	t.dfs = Visiting
+	end := len(t.Dependencies) - 1
+	for i := 0; i <= end; {
+		t2, found := ts.tasksByUUID[t.Dependencies[i]]
+		if !found || t2.Status == STATUS_RESOLVED || t2.dfs == Visiting {
+			if !found {
+				fmt.Printf("not found: %s\n", t.Dependencies[i]);
+			} else if t2.dfs == Visiting {
+				fmt.Printf("back edge: %s -> %s\n", t.UUID, t.Dependencies[i]);
 			}
+			t.Dependencies[i] = t.Dependencies[end]
+			end--
+			t.WritePending = true
+		} else {
+			ts.visitDependencies(t2)
+			i++
 		}
-		t.Dependencies = t.Dependencies[:end+1]
-		if end == -1 && t.Status == STATUS_BLOCKED {
-			t.WritePending = true //maybe it was already empty
-			t.Status = STATUS_PENDING
-		}
+	}
+	t.Dependencies = t.Dependencies[:end+1]
+	if end == -1 && t.Status == STATUS_BLOCKED {
+		t.WritePending = true //maybe it was already empty
+		t.Status = STATUS_PENDING
+	}
+	t.dfs = Visited
+}
+
+func (ts *TaskSet) MaintainDependencies() {
+	for _, t := range ts.tasks {
+		ts.visitDependencies(t)
 	}
 }
 
@@ -265,7 +277,7 @@ func (ts *TaskSet) UpdateTask(task Task) error {
 	task.WritePending = true
 	// existing pointer must point to address of new task copied
 	*ts.tasksByUUID[task.UUID] = task
-	ts.RemoveResolvedDependencies()
+	ts.MaintainDependencies()
 	return nil
 }
 

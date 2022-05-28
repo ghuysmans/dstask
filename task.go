@@ -20,6 +20,14 @@ type SubTask struct {
 	Resolved bool
 }
 
+type DfsState uint
+
+const (
+	Unknown DfsState = iota
+	Visiting
+	Visited
+)
+
 // Task is our representation of tasks added at the command line and serialized
 // to the task database on disk. It is rendered in multiple ways by the TaskSet
 // to which it belongs.
@@ -59,6 +67,9 @@ type Task struct {
 	// TaskSet uses this to indicate if a given task is excluded by a filter
 	// (context etc)
 	filtered bool `json:"-"`
+
+	// TaskSet uses this to detect dependency cycles
+	dfs DfsState `json:"-"`
 }
 
 // Equals returns whether t2 equals task.
