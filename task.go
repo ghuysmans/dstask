@@ -215,6 +215,14 @@ func (t *Task) Normalise() {
 	if t.Priority == "" {
 		t.Priority = PRIORITY_NORMAL
 	}
+
+	if len(t.Dependencies) == 0 {
+		if t.Status == STATUS_BLOCKED {
+			t.Status = STATUS_PENDING
+		}
+	} else {
+		t.Status = STATUS_BLOCKED
+	}
 }
 
 // normalise the task before validating!

@@ -223,10 +223,6 @@ func (ts *TaskSet) RemoveResolvedDependencies() {
 			}
 		}
 		t.Dependencies = t.Dependencies[:end+1]
-		if end == -1 && t.Status == STATUS_BLOCKED {
-			t.WritePending = true //maybe it was already empty
-			t.Status = STATUS_PENDING
-		}
 	}
 }
 
