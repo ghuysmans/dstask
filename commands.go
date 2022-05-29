@@ -57,11 +57,17 @@ func CommandAdd(conf Config, ctx, query Query) error {
 	} else if query.Text != "" {
 		ctx.PrintContextDescription()
 		query = query.Merge(ctx)
+		ts.TranslateDependencies(&query)
+		status := STATUS_PENDING
+		if len(query.Dependencies) > 0 {
+			status = STATUS_BLOCKED
+		}
 		task := Task{
 			WritePending: true,
-			Status:       STATUS_PENDING,
+			Status:       status,
 			Summary:      query.Text,
 			Tags:         query.Tags,
+			Dependencies: query.Dependencies,
 			Project:      query.Project,
 			Priority:     query.Priority,
 			Notes:        query.Note,
